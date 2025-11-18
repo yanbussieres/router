@@ -43,3 +43,24 @@ export const getAuth = createServerFn({ method: 'GET' }).handler(async (): Promi
   const auth = await withAuth();
   return auth;
 });
+
+export const getWidgetToken = createServerFn({ method: 'GET' }).handler(async (): Promise<string | null> => {
+  const auth = await withAuth();
+  
+  if (!auth.user || !auth.organizationId) {
+    return null;
+  }
+
+  try {
+    const token = await getWorkOS().widgets.getToken({
+      organizationId: auth.organizationId,
+      userId: auth.user.id,
+      scopes: ['widgets:users-table:manage'],
+    });
+    
+    return token;
+  } catch (error) {
+    console.error('Failed to generate widget token:', error);
+    return null;
+  }
+});

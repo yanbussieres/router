@@ -60,6 +60,10 @@ function RootComponent() {
                         <Button asChild variant="soft">
                           <Link to="/account">Account</Link>
                         </Button>
+
+                        <Button asChild variant="soft">
+                          <Link to="/users">Users</Link>
+                        </Button>
                       </Flex>
 
                       <Suspense fallback={<div>Loading...</div>}>
