@@ -134,4 +134,12 @@ export interface AuthKitConfig {
    * The domain for the session cookie
    */
   cookieDomain?: string;
+
+  /**
+   * The email domain to use for phone-based user creation
+   * Equivalent to the WORKOS_SMS_EMAIL_DOMAIN environment variable
+   * Used when creating users with phone numbers: {phoneNumber}@{smsEmailDomain}
+   * Defaults to a subdomain of the redirectUri domain or 'sms.localhost' for local development
+   */
+  smsEmailDomain?: string;
 }

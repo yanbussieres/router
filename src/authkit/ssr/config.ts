@@ -29,6 +29,8 @@ export class Configuration {
     // act as the actual time-limited aspects of the session.
     cookieMaxAge: 60 * 60 * 24 * 400,
     apiHostname: 'api.workos.com',
+    // Default SMS email domain - will be derived from redirectUri if not provided
+    smsEmailDomain: undefined,
   };
 
   private valueSource: ValueSource = defaultSource;
@@ -98,6 +100,42 @@ export class Configuration {
     // Then check programmatically provided config
     if (key in config && config[key] != undefined) {
       return config[key] as AuthKitConfig[T];
+    }
+
+    // Special handling for smsEmailDomain
+    // Priority order:
+    // 1. Environment variable WORKOS_SMS_EMAIL_DOMAIN (checked above)
+    // 2. Programmatic config (checked above)
+    // 3. Smart default derived from redirectUri (below)
+    // 4. Final fallback: 'sms.localhost' (below)
+    if (key === 'smsEmailDomain') {
+      try {
+        const redirectUri = this.getValue('redirectUri');
+        if (redirectUri) {
+          try {
+            const url = new URL(redirectUri);
+            const hostname = url.hostname;
+            // For localhost, use a subdomain pattern
+            if (hostname === 'localhost' || hostname.startsWith('127.0.0.1')) {
+              return 'env.' as AuthKitConfig[T];
+            }
+            // For production, use a subdomain of the main domain
+            // e.g., example.com -> sms.example.com
+            const parts = hostname.split('.');
+            if (parts.length >= 2) {
+              const domain = parts.slice(-2).join('.');
+              return `sms.${domain}` as AuthKitConfig[T];
+            }
+            return `sms.${hostname}` as AuthKitConfig[T];
+          } catch {
+            // If URL parsing fails, fall back to default
+          }
+        }
+      } catch {
+        // If redirectUri is not set, continue to default
+      }
+      // Final fallback: 'sms.localhost'
+      return 'sms.localhost' as AuthKitConfig[T];
     }
 
     if (this.requiredKeys.includes(key)) {

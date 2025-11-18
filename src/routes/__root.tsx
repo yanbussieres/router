@@ -6,13 +6,14 @@ import { Suspense } from 'react';
 import { getAuth, getSignInUrl } from '../authkit/serverFunctions';
 import Footer from '../components/footer';
 import SignInButton from '../components/sign-in-button';
+import OrganizationSwitcherComponent from '../components/organization-switcher';
 import type { ReactNode } from 'react';
 
 export const Route = createRootRoute({
   beforeLoad: async () => {
-    const { user } = await getAuth();
+    const auth = await getAuth();
 
-    return { user };
+    return { user: auth.user, organizationId: auth.organizationId };
   },
   head: () => ({
     meta: [
@@ -29,10 +30,11 @@ export const Route = createRootRoute({
     ],
   }),
   loader: async ({ context }) => {
-    const { user } = context;
+    const { user, organizationId } = context;
     const url = await getSignInUrl();
     return {
       user,
+      organizationId,
       url,
     };
   },
@@ -41,7 +43,7 @@ export const Route = createRootRoute({
 });
 
 function RootComponent() {
-  const { user, url } = Route.useLoaderData();
+  const { user, organizationId, url } = Route.useLoaderData();
   return (
     <RootDocument>
       <Theme accentColor="iris" panelBackground="solid" style={{ backgroundColor: 'var(--gray-1)' }}>
@@ -52,23 +54,36 @@ function RootComponent() {
                 <Flex direction="column" height="100%">
                   <Flex asChild justify="between">
                     <header>
-                      <Flex gap="4">
-                        <Button asChild variant="soft">
-                          <Link to="/">Home</Link>
-                        </Button>
+                      {user && (
+                        <Flex gap="4">
+                          <Button asChild variant="soft">
+                            <Link to="/">Home</Link>
+                          </Button>
 
-                        <Button asChild variant="soft">
-                          <Link to="/account">Account</Link>
-                        </Button>
+                          <Button asChild variant="soft">
+                            <Link to="/account">Account</Link>
+                          </Button>
 
-                        <Button asChild variant="soft">
-                          <Link to="/users">Users</Link>
-                        </Button>
+                          <Button asChild variant="soft">
+                            <Link to="/users">Users</Link>
+                          </Button>
+                          
+                          <Button asChild variant="soft">
+                            <Link to="/phone-login">Phone Login</Link>
+                          </Button>
+                        </Flex>
+                      )}
+
+                      <Flex gap="4" align="center">
+                        {user && organizationId && (
+                          <Suspense fallback={null}>
+                            <OrganizationSwitcherComponent />
+                          </Suspense>
+                        )}
+                        <Suspense fallback={<div>Loading...</div>}>
+                          <SignInButton user={user} url={url} />
+                        </Suspense>
                       </Flex>
-
-                      <Suspense fallback={<div>Loading...</div>}>
-                        <SignInButton user={user} url={url} />
-                      </Suspense>
                     </header>
                   </Flex>
 
