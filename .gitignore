@@ -5,9 +5,11 @@ yarn.lock
 .DS_Store
 .cache
 .env
+.env.local
 .vercel
 .output
 
+/dist/
 /build/
 /api/
 /server/build
