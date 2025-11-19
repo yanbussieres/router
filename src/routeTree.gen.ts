@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PhoneLoginRouteImport } from './routes/phone-login'
 import { Route as LogoutRouteImport } from './routes/logout'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
@@ -16,6 +17,11 @@ import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
 import { Route as ApiAuthCallbackRouteImport } from './routes/api/auth/callback'
 
+const PhoneLoginRoute = PhoneLoginRouteImport.update({
+  id: '/phone-login',
+  path: '/phone-login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LogoutRoute = LogoutRouteImport.update({
   id: '/logout',
   path: '/logout',
@@ -49,6 +55,7 @@ const ApiAuthCallbackRoute = ApiAuthCallbackRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/logout': typeof LogoutRoute
+  '/phone-login': typeof PhoneLoginRoute
   '/account': typeof AuthenticatedAccountRoute
   '/users': typeof AuthenticatedUsersRoute
   '/api/auth/callback': typeof ApiAuthCallbackRoute
@@ -56,6 +63,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/logout': typeof LogoutRoute
+  '/phone-login': typeof PhoneLoginRoute
   '/account': typeof AuthenticatedAccountRoute
   '/users': typeof AuthenticatedUsersRoute
   '/api/auth/callback': typeof ApiAuthCallbackRoute
@@ -65,20 +73,34 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/logout': typeof LogoutRoute
+  '/phone-login': typeof PhoneLoginRoute
   '/_authenticated/account': typeof AuthenticatedAccountRoute
   '/_authenticated/users': typeof AuthenticatedUsersRoute
   '/api/auth/callback': typeof ApiAuthCallbackRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/logout' | '/account' | '/users' | '/api/auth/callback'
+  fullPaths:
+    | '/'
+    | '/logout'
+    | '/phone-login'
+    | '/account'
+    | '/users'
+    | '/api/auth/callback'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/logout' | '/account' | '/users' | '/api/auth/callback'
+  to:
+    | '/'
+    | '/logout'
+    | '/phone-login'
+    | '/account'
+    | '/users'
+    | '/api/auth/callback'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/logout'
+    | '/phone-login'
     | '/_authenticated/account'
     | '/_authenticated/users'
     | '/api/auth/callback'
@@ -88,11 +110,19 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   LogoutRoute: typeof LogoutRoute
+  PhoneLoginRoute: typeof PhoneLoginRoute
   ApiAuthCallbackRoute: typeof ApiAuthCallbackRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/phone-login': {
+      id: '/phone-login'
+      path: '/phone-login'
+      fullPath: '/phone-login'
+      preLoaderRoute: typeof PhoneLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/logout': {
       id: '/logout'
       path: '/logout'
@@ -156,6 +186,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   LogoutRoute: LogoutRoute,
+  PhoneLoginRoute: PhoneLoginRoute,
   ApiAuthCallbackRoute: ApiAuthCallbackRoute,
 }
 export const routeTree = rootRouteImport

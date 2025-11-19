@@ -165,13 +165,64 @@ export const createPhoneUserWithSMS = createServerFn({ method: 'POST' })
       emailVerified: true, // Verified since created by backend
     });
     
-    // Step 2: Enroll SMS factor
+    return { user, email };
+  });
+
+// Organization selection functions
+export const listOrganizations = createServerFn({ method: 'GET' })
+  .handler(async () => {
+    try {
+      const result = await getWorkOS().organizations.listOrganizations({
+        limit: 100, // Adjust as needed
+      });
+      return result.data;
+    } catch (error) {
+      console.error('Failed to list organizations:', error);
+      throw new Error('Failed to list organizations');
+    }
+  });
+
+interface CreateOrganizationMembershipInput {
+  userId: string;
+  organizationId: string;
+  roleSlug?: string;
+}
+
+export const createOrganizationMembership = createServerFn({ method: 'POST' })
+  .inputValidator((data: CreateOrganizationMembershipInput) => data)
+  .handler(async ({ data }) => {
+    const { userId, organizationId, roleSlug } = data;
+    
+    try {
+      const membership = await getWorkOS().userManagement.createOrganizationMembership({
+        userId,
+        organizationId,
+        roleSlug: roleSlug || 'member',
+      });
+      
+      return membership;
+    } catch (error) {
+      console.error('Failed to create organization membership:', error);
+      throw new Error('Failed to create organization membership');
+    }
+  });
+
+interface EnrollSMSFactorInput {
+  phoneNumber: string;
+}
+
+export const enrollSMSFactor = createServerFn({ method: 'POST' })
+  .inputValidator((data: EnrollSMSFactorInput) => data)
+  .handler(async ({ data }) => {
+    const { phoneNumber } = data;
+    
+    // Step 2: Enroll SMS factor (moved from createPhoneUserWithSMS)
     const factor = await getWorkOS().mfa.enrollFactor({
       type: 'sms',
       phoneNumber: phoneNumber, // E.164 format recommended
     });
     
-    return { user, factorId: factor.id, email };
+    return { factorId: factor.id };
   });
 
 interface ChallengeSMSFactorInput {
